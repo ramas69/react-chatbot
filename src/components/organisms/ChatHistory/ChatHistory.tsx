@@ -6,7 +6,11 @@ import { ChatHistoryProps } from './ChatHistory.types';
 
 
 const LoadingDots = () => (
-  <motion.div className="flex space-x-2 justify-center py-4">
+  <motion.div 
+    className="flex space-x-2 justify-center py-4"
+    role="status"
+    aria-label="Chargement..."
+  >
     {[0, 1, 2].map((dot) => (
       <motion.div
         key={dot}
