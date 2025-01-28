@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useRef } from 'react';
-import { Paper, Group, Title, Text } from '@mantine/core';
+import { Paper,Group, Title, Text } from '@mantine/core';
 import { IconSend } from '@tabler/icons-react';
 import ChatHistory from '../../organisms/ChatHistory/ChatHistory';
 import Input from '../../atoms/Input/Input';
@@ -44,7 +44,8 @@ const ChatTemplate = forwardRef<HTMLDivElement, ChatTemplateProps>(
     return (
       <div className="h-screen w-full overflow-hidden" data-testid={dataTestId} ref={ref}>
         <Paper shadow="md" radius={0} className="flex flex-col h-full">
-          <Group p="md" className="border-b border-gray-200 bg-white shrink-0">
+          {/* Header */}
+          <Group p="md" className="border-b border-gray-200 bg-white shrink-0" wrap="nowrap">
             <Avatar
               src="https://api.dicebear.com/7.x/avataaars/svg?seed=assistant"
               alt="Assistant"
@@ -59,7 +60,7 @@ const ChatTemplate = forwardRef<HTMLDivElement, ChatTemplateProps>(
           {/* Chat Area */}
           <div className="flex-1 overflow-y-auto bg-gray-50">
             <div className="p-4 max-w-3xl mx-auto">
-              <ChatHistory messages={messages} />
+              <ChatHistory messages={messages} isLoading={isLoading} />
               <div ref={messagesEndRef} />
             </div>
           </div>

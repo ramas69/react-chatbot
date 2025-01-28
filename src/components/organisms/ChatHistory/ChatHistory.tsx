@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import MessageBubble from '../../molecules/MessageBubble/MessageBubble';
+import { motion } from 'framer-motion';
+
 interface Message {
   id: string;
   content: string;
@@ -9,17 +11,38 @@ interface Message {
 
 interface ChatHistoryProps {
   messages: Message[];
+  isLoading?: boolean;
   'data-testid'?: string;
 }
 
+const LoadingDots = () => (
+  <motion.div className="flex space-x-2 justify-center py-4">
+    {[0, 1, 2].map((dot) => (
+      <motion.div
+        key={dot}
+        className="w-2 h-2 bg-gray-400 rounded-full"
+        animate={{
+          scale: [1, 1.5, 1],
+          opacity: [0.5, 1, 0.5]
+        }}
+        transition={{
+          duration: 1,
+          repeat: Infinity,
+          delay: dot * 0.2
+        }}
+      />
+    ))}
+  </motion.div>
+);
+
 const ChatHistory: React.FC<ChatHistoryProps> = ({
   messages,
+  isLoading = false,
   'data-testid': dataTestId = 'chat-history'
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ 
         top: scrollRef.current.scrollHeight, 
@@ -50,6 +73,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({
             />
           ))
         )}
+        {isLoading && <LoadingDots />}
       </div>
     </div>
   );
