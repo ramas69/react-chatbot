@@ -1,27 +1,17 @@
 import { forwardRef, useEffect, useRef } from 'react';
-import { Paper,Group, Title, Text } from '@mantine/core';
-import { IconSend } from '@tabler/icons-react';
+import { Paper, Group, Title, Text, ActionIcon } from '@mantine/core';
+import { IconSend, IconTrash } from '@tabler/icons-react';
 import ChatHistory from '../../organisms/ChatHistory/ChatHistory';
 import Input from '../../atoms/Input/Input';
 import Button from '../../atoms/Button/Button';
 import Avatar from '../../atoms/Avatar/Avatar';
+import { motion } from 'framer-motion';
+import { ChatTemplateProps } from './ChatTemplate.types';
 
-interface ChatTemplateProps {
-  messages: Array<{
-    id: string;
-    content: string;
-    type: 'user' | 'agent';
-    timestamp: string;
-  }>;
-  inputValue: string;
-  onInputChange: (value: string) => void;
-  onSend: () => void;
-  isLoading?: boolean;
-  'data-testid'?: string;
-}
+
 
 const ChatTemplate = forwardRef<HTMLDivElement, ChatTemplateProps>(
-  ({ messages, inputValue, onInputChange, onSend, isLoading = false, 'data-testid': dataTestId = 'chat-template' }, ref) => {
+  ({ messages, inputValue, onInputChange, onSend, onClear, isLoading = false, 'data-testid': dataTestId = 'chat-template' }, ref) => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
@@ -44,17 +34,34 @@ const ChatTemplate = forwardRef<HTMLDivElement, ChatTemplateProps>(
     return (
       <div className="h-screen w-full overflow-hidden" data-testid={dataTestId} ref={ref}>
         <Paper shadow="md" radius={0} className="flex flex-col h-full">
-          {/* Header */}
-          <Group p="md" className="border-b border-gray-200 bg-white shrink-0" wrap="nowrap">
-            <Avatar
-              src="https://api.dicebear.com/7.x/avataaars/svg?seed=assistant"
-              alt="Assistant"
-              size="md"
-            />
-            <div className="min-w-0">
-              <Title order={5} className="truncate">AI Assistant</Title>
-              <Text size="sm" c="dimmed">Online</Text>
-            </div>
+          {/* Header avec bouton de réinitialisation */}
+          <Group p="md" className="border-b border-gray-200 bg-white shrink-0" justify="apart">
+            <Group>
+              <Avatar
+                src="https://robohash.org/assistant?set=set1&size=150x150&bgset=bg1"
+                alt="Assistant"
+                size="md"
+              />
+              <div>
+                <Title order={5}>AI Assistant</Title>
+                <Text size="sm" c="dimmed">Online</Text>
+              </div>
+            </Group>
+            
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <ActionIcon
+                onClick={onClear}
+                variant="light"
+                color="red"
+                disabled={isLoading || messages.length === 0}
+                title="Effacer la conversation"
+              >
+                <IconTrash size={20} />
+              </ActionIcon>
+            </motion.div>
           </Group>
 
           {/* Chat Area */}

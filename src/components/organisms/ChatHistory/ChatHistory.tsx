@@ -2,18 +2,8 @@ import React, { useEffect, useRef } from 'react';
 import MessageBubble from '../../molecules/MessageBubble/MessageBubble';
 import { motion } from 'framer-motion';
 
-interface Message {
-  id: string;
-  content: string;
-  type: 'user' | 'agent';
-  timestamp: string;
-}
+import { ChatHistoryProps } from './ChatHistory.types';
 
-interface ChatHistoryProps {
-  messages: Message[];
-  isLoading?: boolean;
-  'data-testid'?: string;
-}
 
 const LoadingDots = () => (
   <motion.div className="flex space-x-2 justify-center py-4">

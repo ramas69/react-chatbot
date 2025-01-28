@@ -2,13 +2,8 @@ import { forwardRef } from 'react';
 import { Paper, Group, Stack, Text } from '@mantine/core';
 import Avatar from '../../atoms/Avatar/Avatar';
 import { motion } from 'framer-motion';
+import { MessageBubbleProps } from './MessageBubble.types';
 
-interface MessageBubbleProps {
-  type: 'user' | 'agent';
-  message: string;
-  timestamp: string;
-  'data-testid'?: string;
-}
 
 const MessageBubble = forwardRef<HTMLDivElement, MessageBubbleProps>(
   ({ type, message, timestamp, 'data-testid': dataTestId = 'message-bubble' }, ref) => {

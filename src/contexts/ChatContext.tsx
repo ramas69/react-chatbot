@@ -2,29 +2,21 @@ import { createContext, useContext, ReactNode, useState } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { notifications } from '@mantine/notifications';
 import { getChatResponse } from '../services/ChatService';
+import { Message, ChatContextType } from '../types/chat.types';
 
-type Message = {
-  id: string;
-  content: string;
-  type: 'user' | 'agent';
-  timestamp: string;
-};
 
-interface ChatContextType {
-  messages: Message[];
-  inputValue: string;
-  isLoading: boolean;
-  setInputValue: (value: string) => void;
-  sendMessage: () => Promise<void>;
-  clearHistory: () => void;
-}
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export function ChatProvider({ children }: { children: ReactNode }) {
-  const { value: messages, setValue: setMessages, clearStorage: clearHistory } = useLocalStorage<Message[]>('chat_history');
+  const { value: messages = [], setValue: setMessages, clearStorage } = useLocalStorage<Message[]>('chat_history', []);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  const clearHistory = () => {
+    clearStorage();
+    setMessages([]);  
+  };
 
   const sendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
