@@ -1,85 +1,67 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import ChatTemplate from '../../templates/ChatTemplate/ChatTemplate';
-const agentResponses = {
-  greeting: [
-    "Bonjour! Comment puis-je vous aider aujourd'hui?",
-    "Salut! Je suis là pour répondre à vos questions.",
-    "Bonjour! En quoi puis-je vous être utile?"
-  ],
-  default: [
-    "Je comprends. Pouvez-vous me donner plus de détails?",
-    "Intéressant. Que souhaitez-vous savoir de plus?",
-    "Je peux vous aider avec ça. Que voulez-vous savoir exactement?"
-  ],
-  farewell: [
-    "Au revoir! N'hésitez pas si vous avez d'autres questions.",
-    "Merci de votre visite! Passez une excellente journée!",
-    "Au revoir! J'espère avoir pu vous aider."
-  ]
+import { getChatResponse } from '../../../services/ChatService';
+import { useLocalStorage } from '../../../hooks/useLocalStorage';
+
+
+type Message = {
+  id: string;
+  content: string;
+  type: 'user' | 'agent';
+  timestamp: string;
 };
 
-const getRandomResponse = (type: keyof typeof agentResponses) => {
-  const responses = agentResponses[type];
-  return responses[Math.floor(Math.random() * responses.length)];
-};
+const STORAGE_KEY = 'chat_history';
 
 const ChatPage = () => {
-  const [messages, setMessages] = useState<Array<{
-    id: string;
-    content: string;
-    type: 'user' | 'agent';
-    timestamp: string;
-  }>>([]);
+  const { value: messages, setValue: setMessages, clearStorage: clearHistory } = useLocalStorage<Message[]>(STORAGE_KEY);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  const generateAgentResponse = useCallback((userMessage: string) => {
-    const lowerMessage = userMessage.toLowerCase();
-    let responseType: keyof typeof agentResponses = 'default';
-
-    if (lowerMessage.includes('bonjour') || lowerMessage.includes('salut')) {
-      responseType = 'greeting';
-    } else if (lowerMessage.includes('au revoir') || lowerMessage.includes('bye')) {
-      responseType = 'farewell';
-    }
-
-    return getRandomResponse(responseType);
-  }, []);
 
   const handleSend = useCallback(async () => {
     if (!inputValue.trim() || isLoading) return;
 
-    const userMessage = {
+    const userMessage: Message = {
       id: Date.now().toString(),
       content: inputValue.trim(),
-      type: 'user' as const,
+      type: 'user',
       timestamp: new Date().toLocaleTimeString([], { 
         hour: '2-digit', 
         minute: '2-digit' 
       })
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev: Message[]) => [...prev, userMessage]);
     setInputValue('');
     setIsLoading(true);
 
-    // simule le délai de réponse de l'agent
-    setTimeout(() => {
-      const agentMessage = {
+    try {
+      const response = await getChatResponse(userMessage.content);
+      
+      const agentMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: generateAgentResponse(userMessage.content),
-        type: 'agent' as const,
+        content: response,
+        type: 'agent',
         timestamp: new Date().toLocaleTimeString([], { 
           hour: '2-digit', 
           minute: '2-digit' 
         })
       };
 
-      setMessages(prev => [...prev, agentMessage]);
+      setMessages((prev: Message[]) => [...prev, agentMessage]);
+    } catch (error) {
+      notifications.show({
+        title: 'Erreur',
+        message: 'Impossible de générer une réponse.',
+        color: 'red'
+      });
+    } finally {
       setIsLoading(false);
-    }, Math.random() * 1000 + 500); 
-  }, [inputValue, isLoading, generateAgentResponse]);
+    }
+  }, [inputValue, isLoading, setMessages]);
 
   return (
     <AnimatePresence>
@@ -88,7 +70,19 @@ const ChatPage = () => {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 20 }}
         transition={{ duration: 0.3 }}
+        className="relative"
       >
+        <div className="absolute top-4 right-4 z-10 flex gap-4 items-center">
+          <Button
+            onClick={clearHistory}
+            variant="light"
+            color="red"
+            disabled={isLoading || messages.length === 0}
+          >
+            Effacer l'historique
+          </Button>
+        </div>
+
         <ChatTemplate
           messages={messages}
           inputValue={inputValue}
