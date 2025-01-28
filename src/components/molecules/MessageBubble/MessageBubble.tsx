@@ -1,44 +1,58 @@
-import React from 'react';
+import { forwardRef } from 'react';
+import { Paper, Group, Stack, Text } from '@mantine/core';
 import Avatar from '../../atoms/Avatar/Avatar';
-import Text from '../../atoms/Text/Text';
 
 interface MessageBubbleProps {
-  message: string;
   type: 'user' | 'agent';
-  timestamp?: string;
+  message: string;
+  timestamp: string;
   'data-testid'?: string;
 }
 
-const MessageBubble: React.FC<MessageBubbleProps> = ({
-  message,
-  type,
-  timestamp,
-  'data-testid': dataTestId = 'message-bubble'
-}) => {
-  const isUser = type === 'user';
+const MessageBubble = forwardRef<HTMLDivElement, MessageBubbleProps>(
+  ({ type, message, timestamp, 'data-testid': dataTestId = 'message-bubble' }, ref) => {
+    const isUser = type === 'user';
 
-  return (
-    <div
-      data-testid={dataTestId}
-      className={`flex items-start gap-2 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
-    >
-      <Avatar
-        radius="xl"
-        color={isUser ? 'blue' : 'gray'}
-        data-testid={`${dataTestId}-avatar`}
-      />
-      <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
-        <Text variant={type} data-testid={`${dataTestId}-text`}>
-          {message}
-        </Text>
-        {timestamp && (
-          <span className="text-xs text-gray-400 mt-1" data-testid={`${dataTestId}-timestamp`}>
-            {timestamp}
-          </span>
+    return (
+      <Group 
+        justify={isUser ? 'flex-end' : 'flex-start'} 
+        align="flex-start" 
+        ref={ref}
+        data-testid={dataTestId}
+      >
+        {!isUser && (
+          <Avatar
+            src="https://api.dicebear.com/7.x/avataaars/svg?seed=assistant"
+            alt="Assistant Avatar"
+          />
         )}
-      </div>
-    </div>
-  );
-};
+        
+        <Stack gap="xs" style={{ maxWidth: '70%' }}>
+          <Paper
+            p="sm"
+            radius="lg"
+            bg={isUser ? 'blue.6' : 'gray.1'}
+            c={isUser ? 'white' : 'dark'}
+            withBorder={!isUser}
+          >
+            {message}
+          </Paper>
+          <Text size="xs" c="dimmed" ta={isUser ? 'right' : 'left'}>
+            {timestamp}
+          </Text>
+        </Stack>
+
+        {isUser && (
+          <Avatar
+            src="https://api.dicebear.com/7.x/avataaars/svg?seed=user"
+            alt="User Avatar"
+          />
+        )}
+      </Group>
+    );
+  }
+);
+
+MessageBubble.displayName = 'MessageBubble';
 
 export default MessageBubble;
